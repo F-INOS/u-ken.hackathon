@@ -25,6 +25,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.ibm.watson.developer_cloud.http.HttpMediaType;
+import com.ibm.watson.developer_cloud.natural_language_classifier.v1.NaturalLanguageClassifier;
+import com.ibm.watson.developer_cloud.natural_language_classifier.v1.model.Classification;
 import com.ibm.watson.developer_cloud.speech_to_text.v1.SpeechToText;
 import com.ibm.watson.developer_cloud.speech_to_text.v1.model.RecognizeOptions;
 import com.ibm.watson.developer_cloud.speech_to_text.v1.model.SpeechResults;
@@ -65,6 +67,7 @@ public class SpeechToTextServlet extends HttpServlet {
 		    byte[] audio_file = null;
 		    String out = "";
 
+		    String uploadPath = getServletContext().getRealPath("/WEB-INF/uploaded")+"/moriagaru.wav";
 		    ArrayList<String> resultOutput = new ArrayList<String>();
 
 		    // Speech to Text を使うための username と password（環境変数にかかれていたもの）
@@ -84,10 +87,22 @@ public class SpeechToTextServlet extends HttpServlet {
 		    JSONParser parser = new JSONParser();
 
 		    String strHidURL = "";
+		    String strInput = "";
+
+		    String strHidBlob="";
 
 		    try{
 
+		    	strHidURL = req.getParameter("bUrl");
+		    	strInput = req.getParameter("tInput");
 
+		    	if (strInput.indexOf("もりあがる")!=-1)
+		    	{
+
+		    	}
+
+		    	//Part part= req.getPart(strHidBlob);
+		    	//part.write(uploadPath);
 
 		      //List<FileItem> list = upload.parseRequest(req);
 		      //Iterator<FileItem> iterator = list.iterator();
@@ -190,8 +205,9 @@ public class SpeechToTextServlet extends HttpServlet {
 	        stt.setUsernameAndPassword(username, password);
 	        //stt.setEndPoint("https://stream.watsonplatform.net/speech-to-text/api");
 
-	        File audio = new File("C:\\tmp\\aiueo1.wav");
+	        //File audio = new File("C:\\tmp\\aiueo1.wav");
 	        //File audio = new File(strHidURL);
+	        File audio = new File(uploadPath);
 	        RecognizeOptions recognizeOptions = new RecognizeOptions.Builder()
             .contentType(HttpMediaType.AUDIO_WAV) //
             .continuous(true) //
@@ -222,7 +238,30 @@ public class SpeechToTextServlet extends HttpServlet {
 
 		            resultOutput.add(confidence.toString());
 		            resultOutput.add(transcript);
+
+
+		            //NLCはどうかな？
+					NaturalLanguageClassifier service = new NaturalLanguageClassifier();
+					service.setUsernameAndPassword("69b20f57-c85e-4cf0-a016-9e5bfd407a6d", "NhApFs18GHA3");
+
+					Classification classification = service.classify("8d6cd8x123-nlc-1120", transcript).execute();
+					System.out.println(classification);
+					resultOutput.add(classification.toString());
+					obj = ( JSONObject )parser.parse( classification.toString() );
+					JSONArray classes = ( JSONArray )obj.get( "classes" );
+					for( int j = 0; j < classes.size(); j ++ ){
+			            JSONObject m_class = ( JSONObject )classes.get( j );
+			            Double m_confidence = ( Double )m_class.get( "confidence" );
+			            String m_class_name = ( String )m_class.get( "class_name" );
+
+			            out = m_class_name + "\t" + m_confidence;  // 結果をタブでつないで出力する
+			            System.out.println( out );
+
+			            resultOutput.add(m_confidence.toString());
+			            resultOutput.add(m_class_name);
+					}
 		          }
+
 		        }
 			} catch (ParseException e) {
 				// TODO 自動生成された catch ブロック
@@ -233,7 +272,12 @@ public class SpeechToTextServlet extends HttpServlet {
 
 
 
+
 	        req.setAttribute("resultOutput", resultOutput);
+
+
+
+
 
 	        RequestDispatcher rd = req.getRequestDispatcher("./speech2text.jsp");
 	        rd.forward(req, res);

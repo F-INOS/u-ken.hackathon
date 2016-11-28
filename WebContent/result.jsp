@@ -1,11 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="booklist.bean.Book" %>
 <!DOCTYPE html>
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Book List</title>
+	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
+    <link rel="stylesheet" href="style.css" />
+    <title>What Song</title>
   </head>
 
   <body>
@@ -38,14 +41,22 @@
       <source src="http://hakuhin.jp/download/js/audio/sample_00.wav" type="audio/wav">
     </audio> -->
 
-        <button id="StartRecording">スタート</button>
-        <button id="StopRecording">ストップ</button>
-        <button id="StartPlaying">再生</button>
+		<h2>どんな曲をお探しですか？</h2>
+		<br>
+        <button id="StartRecording">話しかける</button>
+        <button id="StopRecording" disabled="disabled">ストップ</button>
+        <button id="StartPlaying">再生（テスト）</button>
+        <!-- <button id="StartPlaying">再生</button>
         <button id="GenerateWAV">WAVの生成</button>
         <button id="DownloadWAV">WAVのダウンロード</button>
-        <button id="Upload">Upload</button>
+        <button id="Upload">Upload</button> -->
 
+<br>
+<br>
+		<input type="text" id="txtInput" name="txtInput" size="40">
 
+		<input type="hidden" id="hidUrl" name="hidUrl">
+		<input type="hidden" id="hidBlob" name="hidBlob">
 
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script>
@@ -198,16 +209,20 @@ var recorder = new Recorder(audioContext);
 var localurl = null;
 
 function startRecording() {
+	document.querySelector("#StartRecording").setAttribute("disabled", true);
+	document.querySelector("#StopRecording").removeAttribute("disabled");
 recorder.recStart(); // 録音開始
 };
 
 function stopRecording() {
 console.log('録音停止');
+document.querySelector("#StartRecording").removeAttribute("disabled");
+document.querySelector("#StopRecording").setAttribute("disabled", true);
 recorder.recStop(); // 録音停止
 recorder.getAudioBufferArray(); //音声配列データの取得
 recorder.getAudioBuffer(); //AudioBuffer の取得
 generateWAV();
-alert(localurl);
+//alert(localurl);
 };
 
 function startPlaying() {
@@ -222,9 +237,9 @@ function generateWAV() {
 	console.log('WAV生成');
     var blob = exportWAV(recorder.getAudioBufferArray(), audioContext.sampleRate)
     localurl = URL.createObjectURL(blob);
-    document.getElementById("hidUrl").value = localurl;
     console.log(localurl);
-    alert(document.getElementById("hidUrl").value);
+    document.getElementById("hidUrl").value = localurl;
+    document.getElementById("hidBlob").value = blob;
 };
 
 //querySelectorでは、#をつけることで、idがbtnStartMonitoringの要素を取得している(つまり、Startボタン)
@@ -246,11 +261,25 @@ document.querySelector("#Upload").onclick = function() {
 
 
 
-
-<form name="frm" method="post" enctype="multipart/form-data" action="./speech2text">
-<input type="file" name="audio_file"/>
-<input type="hidden" id="hidUrl">
-<input type="submit" value="Submit"/>
+<%-- <form name="frm" method="post" enctype="multipart/form-data" action="./speech2text">--%>
+<form name="frm" method="post"  action="./speech2text">
+<script>
+function onClickSearch(){
+	var bUrl =document.getElementById('hidUrl').value;
+	document.getElementById('bUrl').value=bUrl;
+	var bBlob =document.getElementById('hidBlob').value;
+	document.getElementById('bBlob').value=bBlob;
+	var tInput =document.getElementById('txtInput').value;
+	document.getElementById('tInput').value=tInput;
+	}
+</script>
+<%--<input type="file" name="audio_file"/>--%>
+<input type="hidden" id="bUrl" name="bUrl" value="">
+<input type="hidden" id="bBlob" name="bBlob">
+<input type="hidden" id="tInput" name="tInput" value="">
+<br>
+<input type="submit" name="btnSearch" onclick="onClickSearch();" value="さがす"/>
+<%-- <input type="submit" id="button1" value="Submit"/>--%>
 </form>
 
 
