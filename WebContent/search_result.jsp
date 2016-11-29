@@ -76,7 +76,7 @@ div#modal-content {
 	z-index:2;
 	position:fixed;
 	background:white;
-	width: 400px;
+	width: 450px;
 	height: 400px;
 	background: linear-gradient(to right,rgb(255,255,255), rgb(245,245,245), rgb(250,250,250));
 	background-color: #fff;
@@ -125,7 +125,7 @@ div#modal-content {
 	}
 	table {
 	  background: white;
-	  width : 400px;
+	  width : 450px;
 	  border : 3px solid silver;
 	}
 	tr {
@@ -200,7 +200,7 @@ div#modal-content {
 		//var ch = el2.clientHeight;
 		//var cw = el2.clientWidth;
 		var ch = 400;
-		var cw = 400;
+		var cw = 450;
 		//var cw = $( "#modal-content" ).outerWidth();
 		//var ch = $( "#modal-content" ).outerHeight();
 
